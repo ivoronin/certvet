@@ -25,7 +25,8 @@ jobs:
         uses: golangci/golangci-lint-action@v7
         with:
           version: v2.1.6
-          args: --help
+          install-mode: binary
+          skip-cache: true
 
       - name: Run lint
         run: make lint
