@@ -9,15 +9,26 @@ certvet is a CLI tool that validates SSL/TLS certificates against real Apple and
 ## Build Commands
 
 ```bash
-make build      # Build binary (auto-compresses CSV data first)
-make test       # Run test suite
-make lint       # Run go vet + golangci-lint
-make generate   # Regenerate trust stores from upstream sources
-make dev        # Regenerate + build (development workflow)
-make clean      # Remove binary and compressed files
+make build            # Build binary (auto-compresses CSV data first)
+make test             # Run unit tests only (no binary required)
+make test-integration # Build + run integration tests (requires binary)
+make test-all         # Build + run all tests
+make lint             # Run go vet + golangci-lint
+make generate         # Regenerate trust stores from upstream sources
+make dev              # Regenerate + build (development workflow)
+make clean            # Remove binary and compressed files
 ```
 
 Single test: `go test ./internal/validator -run TestValidateChain -v`
+
+## Testing
+
+Tests are split into two categories:
+
+- **Unit tests**: Run with `make test`, no binary or network required
+- **Integration tests**: Tagged with `//go:build integration`, require built binary, run with `make test-integration`
+
+The `cmd/certvet` package contains integration tests that execute the CLI binary via `testutil.RunCLI()`. These tests verify exit codes and full command behavior.
 
 ## Architecture
 
