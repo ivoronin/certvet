@@ -1,0 +1,34 @@
+# Test workflow - runs on PRs, pushes to main, and can be called by other workflows
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_call:  # Allow other workflows to call this one
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Run tests
+        run: make test
+
+      - name: Install golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          args: --help
+
+      - name: Run lint
+        run: make lint
+
+      - name: Build
+        run: make build

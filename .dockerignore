@@ -1,0 +1,33 @@
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+!go.mod
+docs/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+certvet
+*.exe
+
+# Test and development
+*_test.go
+testdata/
+tools/generate/testdata/
+
+# CI/CD (not needed in image)
+.github/
+.goreleaser.yml
+.golangci.yml
+
+# Misc
+LICENSE
+Makefile

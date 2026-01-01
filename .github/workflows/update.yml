@@ -1,0 +1,55 @@
+# Certificate update workflow - runs weekly on Sunday
+name: Update Certificates and Trust Stores
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday at 00:00 UTC
+  workflow_dispatch:      # Manual trigger
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Update trust stores
+        run: make generate
+
+      - name: Run tests
+        run: make test
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet internal/truststore/*_gen.go; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit changes
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add internal/truststore/*_gen.go
+          git commit -m "chore: update trust stores $(date +%Y.%m.%d)"
+          git push
+
+      - name: Create CalVer tag
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          TAG="v$(date +%Y.%m.%d)"
+          # Handle multiple releases on same day
+          SUFFIX=""
+          COUNT=1
+          while git rev-parse "$TAG$SUFFIX" >/dev/null 2>&1; do
+            SUFFIX="-$COUNT"
+            COUNT=$((COUNT + 1))
+          done
+          git tag "$TAG$SUFFIX"
+          git push origin "$TAG$SUFFIX"
