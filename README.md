@@ -12,12 +12,12 @@
 
 ---
 
-🔒 **Zero Dependencies** · Single binary, embedded trust stores, works offline
-📱 **Multi-Platform** · iOS, Android, Chrome, macOS, Windows — all versions
-🔄 **CI/CD Native** · JSON output, semantic exit codes, pipeline-ready
-🛡️ **Privacy-First** · No telemetry, no external calls except your endpoint
-📅 **Fresh Data** · Trust stores updated weekly, CalVer releases
-⚡ **Fast** · Parallel validation, results in seconds
+- 🔒 **Zero Dependencies** · Single binary, embedded trust stores, works offline
+- 📱 **Multi-Platform** · iOS, Android, Chrome, macOS, Windows — all versions
+- 🔄 **CI/CD Native** · JSON output, semantic exit codes, pipeline-ready
+- 🛡️ **Privacy-First** · No telemetry, no external calls except your endpoint
+- 📅 **Fresh Data** · Trust stores updated weekly, CalVer releases
+- ⚡ **Fast** · Parallel validation, results in seconds
 
 ---
 
