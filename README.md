@@ -4,7 +4,7 @@
 
 > 💡 **testssl.sh** tests if your config is secure. **certvet** tells you if iOS 15 users can connect.
 
-[![Build](https://img.shields.io/github/actions/workflow/status/ivoronin/certvet/ci.yml?style=flat-square)](https://github.com/ivoronin/certvet/actions)
+[![Build](https://img.shields.io/github/actions/workflow/status/ivoronin/certvet/release.yml?style=flat-square)](https://github.com/ivoronin/certvet/actions)
 [![Version](https://img.shields.io/github/v/release/ivoronin/certvet?style=flat-square)](https://github.com/ivoronin/certvet/releases)
 [![Docker](https://img.shields.io/badge/docker-ghcr.io-blue?style=flat-square&logo=docker)](https://github.com/ivoronin/certvet/pkgs/container/certvet)
 [![License](https://img.shields.io/badge/license-ELv2-blue?style=flat-square)](LICENSE)
