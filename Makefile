@@ -28,7 +28,6 @@ test-all: build
 	go test -tags=integration ./...
 
 lint:
-	go vet ./...
 	golangci-lint run
 
 clean:

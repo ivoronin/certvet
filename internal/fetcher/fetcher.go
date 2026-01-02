@@ -49,7 +49,7 @@ func FetchCertChain(endpoint string, timeout time.Duration) (*truststore.CertCha
 	// Connect with timeout
 	dialer := &net.Dialer{Timeout: timeout}
 	conn, err := tls.DialWithDialer(dialer, "tcp", addr, &tls.Config{
-		InsecureSkipVerify: true, // We verify manually against our trust stores
+		InsecureSkipVerify: true, //nolint:gosec // G402: Intentional - we validate against custom trust stores
 	})
 	if err != nil {
 		return nil, fmt.Errorf("TLS connection failed: %w", err)
@@ -106,6 +106,7 @@ func parseSCT(data []byte, source truststore.SCTSource) (truststore.SCT, error) 
 
 	// Timestamp (8 bytes, big-endian milliseconds since Unix epoch)
 	timestampMs := binary.BigEndian.Uint64(data[sctTimestampOffset : sctTimestampOffset+sctTimestampSize])
+	//nolint:gosec // G115: Safe - SCT timestamps are within int64 range (years 1970-2262)
 	timestamp := time.Unix(int64(timestampMs/msPerSecond), int64((timestampMs%msPerSecond)*nsPerMs)).UTC()
 
 	return truststore.SCT{

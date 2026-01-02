@@ -5,8 +5,68 @@ run:
 
 linters:
   enable:
+    # Essential - bug detection
     - errcheck
     - govet
     - staticcheck
     - unused
     - ineffassign
+
+    # Security
+    - gosec
+    - bodyclose
+    - nilerr
+    - errorlint
+
+    # Code quality
+    - gocritic
+    - unconvert
+    - unparam
+    - misspell
+    - goconst
+    - gocyclo
+    - dupl
+
+    # Go 1.22+ modernization
+    - copyloopvar
+    - intrange
+
+    # Best practices
+    - usestdlibvars
+    - predeclared
+
+    # Test quality
+    - thelper
+    - tparallel
+
+  settings:
+    errcheck:
+      check-blank: false  # Don't flag intentional _ = err patterns
+
+    goconst:
+      min-len: 3
+      min-occurrences: 3
+
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - performance
+      disabled-checks:
+        - ifElseChain  # Sometimes clearer than switch
+
+    misspell:
+      locale: US
+
+    gocyclo:
+      min-complexity: 15
+
+    dupl:
+      threshold: 100
+
+  exclusions:
+    paths:
+      - tools/generate/testdata
+    rules:
+      - path: _test\.go
+        linters:
+          - dupl  # Test duplication is often intentional

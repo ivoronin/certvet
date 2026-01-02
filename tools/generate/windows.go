@@ -81,8 +81,8 @@ func parseFiletime(data []byte) (time.Time, error) {
 	}
 
 	// Convert 100-nanosecond intervals to seconds and nanoseconds
-	seconds := int64(ft/10000000) - filetimeEpochOffset
-	nanoseconds := int64((ft % 10000000) * 100)
+	seconds := int64(ft/10000000) - filetimeEpochOffset       //nolint:gosec // G115: Safe - FILETIME fits in int64
+	nanoseconds := int64((ft % 10000000) * 100)              //nolint:gosec // G115: Safe - remainder < 10M * 100
 
 	return time.Unix(seconds, nanoseconds).UTC(), nil
 }

@@ -248,7 +248,7 @@ func TestIsTrustedInVersion_NoConstraints(t *testing.T) {
 
 	// Should be trusted in any version
 	for _, version := range []string{"100", "138", "139", "200", "current"} {
-		if !isTrustedInVersion(anchor, version) {
+		if !isTrustedInVersion(&anchor, version) {
 			t.Errorf("anchor with no constraints should be trusted in version %q", version)
 		}
 	}
@@ -276,7 +276,7 @@ func TestIsTrustedInVersion_MinVersion(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := isTrustedInVersion(anchor, tt.version)
+		got := isTrustedInVersion(&anchor, tt.version)
 		if got != tt.want {
 			t.Errorf("isTrustedInVersion(MinVersion=139, %q) = %v, want %v", tt.version, got, tt.want)
 		}
@@ -306,7 +306,7 @@ func TestIsTrustedInVersion_MaxVersionExcl(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := isTrustedInVersion(anchor, tt.version)
+		got := isTrustedInVersion(&anchor, tt.version)
 		if got != tt.want {
 			t.Errorf("isTrustedInVersion(MaxVersionExcl=140, %q) = %v, want %v", tt.version, got, tt.want)
 		}
@@ -326,7 +326,7 @@ func TestIsTrustedInVersion_SCTOnly(t *testing.T) {
 
 	// Per ADR-2: SCT constraints are ignored, so cert should be trusted in all versions
 	for _, version := range []string{"100", "138", "139", "200", "current"} {
-		if !isTrustedInVersion(anchor, version) {
+		if !isTrustedInVersion(&anchor, version) {
 			t.Errorf("anchor with SCT-only constraint should be trusted in version %q (SCT ignored)", version)
 		}
 	}
@@ -350,7 +350,7 @@ func TestIsTrustedInVersion_MultipleConstraints(t *testing.T) {
 
 	// OR logic: if ANY constraint block passes, the cert is trusted
 	for _, version := range []string{"137", "138", "139", "140", "current"} {
-		if !isTrustedInVersion(anchor, version) {
+		if !isTrustedInVersion(&anchor, version) {
 			t.Errorf("anchor with OR constraints (>=139 OR <139) should be trusted in version %q", version)
 		}
 	}
@@ -381,7 +381,7 @@ func TestIsTrustedInVersion_MinMaxCombined(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := isTrustedInVersion(anchor, tt.version)
+		got := isTrustedInVersion(&anchor, tt.version)
 		if got != tt.want {
 			t.Errorf("isTrustedInVersion(Min=138,Max=140, %q) = %v, want %v", tt.version, got, tt.want)
 		}
@@ -420,7 +420,6 @@ func TestIsTrustedInVersion_CurrentVersion(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -428,7 +427,7 @@ func TestIsTrustedInVersion_CurrentVersion(t *testing.T) {
 				Fingerprint: testFP("AA"),
 				Constraints: tt.constraints,
 			}
-			got := isTrustedInVersion(anchor, "current")
+			got := isTrustedInVersion(&anchor, "current")
 			if got != tt.want {
 				t.Errorf("isTrustedInVersion(%s, current) = %v, want %v", tt.name, got, tt.want)
 			}
@@ -577,11 +576,10 @@ func TestExtractSCTNotAfter(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := extractSCTNotAfter(tt.anchor)
+			got := extractSCTNotAfter(&tt.anchor)
 
 			if tt.wantNil {
 				if got != nil {

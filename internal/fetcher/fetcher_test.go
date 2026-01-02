@@ -83,7 +83,7 @@ func TestParseSCT(t *testing.T) {
 			// Verify parsed values for valid case
 			if tt.name == "valid SCT v1" {
 				// Verify log ID
-				for i := 0; i < 32; i++ {
+				for i := range 32 {
 					if sct.LogID[i] != byte(i+1) {
 						t.Errorf("LogID[%d] = %d, want %d", i, sct.LogID[i], i+1)
 					}
