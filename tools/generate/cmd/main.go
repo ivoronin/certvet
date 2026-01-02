@@ -22,7 +22,7 @@ const dataDir = "internal/truststore/data"
 
 func main() {
 	// Ensure data directory exists
-	if err := os.MkdirAll(dataDir, 0755); err != nil {
+	if err := os.MkdirAll(dataDir, 0755); err != nil { //nolint:gosec // G301: 0755 is standard for data directories
 		fmt.Fprintf(os.Stderr, "Error creating data directory: %v\n", err)
 		os.Exit(1)
 	}
@@ -108,7 +108,7 @@ func writeCertificatesCSV(certs []generate.Certificate) error {
 	})
 
 	path := filepath.Join(dataDir, "certificates.csv")
-	f, err := os.Create(path)
+	f, err := os.Create(path) //nolint:gosec // G304: Path is constant dataDir + filename
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func writeStoresCSV(entries []generate.TrustEntry) error {
 	})
 
 	path := filepath.Join(dataDir, "stores.csv")
-	f, err := os.Create(path)
+	f, err := os.Create(path) //nolint:gosec // G304: Path is constant dataDir + filename
 	if err != nil {
 		return err
 	}

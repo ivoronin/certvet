@@ -27,13 +27,13 @@ type TrustEntry struct {
 }
 
 // HasConstraints returns true if any constraint is set.
-func (e TrustEntry) HasConstraints() bool {
+func (e *TrustEntry) HasConstraints() bool {
 	return e.NotBeforeMax != nil || e.DistrustDate != nil || e.SCTNotAfter != nil
 }
 
 // FormatConstraints returns constraint string for display.
 // Returns "-" if no constraints, otherwise "notbefore<DATE, distrust<DATE, sct<DATE"
-func (e TrustEntry) FormatConstraints(wide bool) string {
+func (e *TrustEntry) FormatConstraints(wide bool) string {
 	var parts []string
 	format := "2006-01-02"
 	if wide {

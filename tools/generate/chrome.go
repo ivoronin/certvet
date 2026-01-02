@@ -68,7 +68,7 @@ func (ChromeGenerator) Generate() ([]TrustEntry, error) {
 
 			// Surface SCT constraints for all versions (time-aware validation)
 			if anchor, ok := anchorByFP[fp]; ok {
-				entry.SCTNotAfter = extractSCTNotAfter(anchor)
+				entry.SCTNotAfter = extractSCTNotAfter(&anchor)
 			}
 
 			entries = append(entries, entry)
@@ -97,7 +97,7 @@ type ChromeConstraint struct {
 // Returns nil if no SCT-only constraints exist (version-only or no constraints).
 // SCT-only means: has sct_not_after_sec but no version bounds.
 // If multiple SCT-only blocks exist (OR logic), returns the latest (most permissive).
-func extractSCTNotAfter(anchor ChromeTrustAnchor) *time.Time {
+func extractSCTNotAfter(anchor *ChromeTrustAnchor) *time.Time {
 	var latest int64
 	found := false
 
@@ -206,7 +206,7 @@ func ParseChromeTextproto(protoContent, textprotoContent []byte) (int, []ChromeT
 	trustAnchorsList := rootStore.Get(trustAnchorsField).List()
 
 	anchors := make([]ChromeTrustAnchor, 0, trustAnchorsList.Len())
-	for i := 0; i < trustAnchorsList.Len(); i++ {
+	for i := range trustAnchorsList.Len() {
 		ta := trustAnchorsList.Get(i).Message()
 		taDesc := ta.Descriptor()
 
@@ -227,7 +227,7 @@ func ParseChromeTextproto(protoContent, textprotoContent []byte) (int, []ChromeT
 		evPolicyOidsField := taDesc.Fields().ByName("ev_policy_oids")
 		evPolicyOidsList := ta.Get(evPolicyOidsField).List()
 		evPolicyOids := make([]string, evPolicyOidsList.Len())
-		for j := 0; j < evPolicyOidsList.Len(); j++ {
+		for j := range evPolicyOidsList.Len() {
 			evPolicyOids[j] = evPolicyOidsList.Get(j).String()
 		}
 
@@ -244,7 +244,7 @@ func ParseChromeTextproto(protoContent, textprotoContent []byte) (int, []ChromeT
 		// Get constraints
 		constraintsField := taDesc.Fields().ByName("constraints")
 		constraintsList := ta.Get(constraintsField).List()
-		for j := 0; j < constraintsList.Len(); j++ {
+		for j := range constraintsList.Len() {
 			c := constraintsList.Get(j).Message()
 			cDesc := c.Descriptor()
 
@@ -269,7 +269,7 @@ func ParseChromeTextproto(protoContent, textprotoContent []byte) (int, []ChromeT
 // isTrustedInVersion determines if a certificate is trusted in a given Chrome version.
 // Uses OR logic between constraint blocks: if ANY block passes, the cert is trusted.
 // Per ADR-2, SCT constraints are ignored - only version constraints are evaluated.
-func isTrustedInVersion(anchor ChromeTrustAnchor, ver string) bool {
+func isTrustedInVersion(anchor *ChromeTrustAnchor, ver string) bool {
 	// No constraints = unconditionally trusted in all versions
 	if len(anchor.Constraints) == 0 {
 		return true
@@ -322,9 +322,9 @@ func generateVersionMappedFingerprints(anchors []ChromeTrustAnchor, versions []s
 
 	for _, version := range versions {
 		var fingerprints []truststore.Fingerprint
-		for _, anchor := range anchors {
-			if isTrustedInVersion(anchor, version) {
-				fingerprints = append(fingerprints, anchor.Fingerprint)
+		for i := range anchors {
+			if isTrustedInVersion(&anchors[i], version) {
+				fingerprints = append(fingerprints, anchors[i].Fingerprint)
 			}
 		}
 		// Sort for reproducibility

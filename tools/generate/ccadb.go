@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/csv"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -110,7 +111,7 @@ func ParseCCADBCSV(r io.Reader) ([]CCADBCert, error) {
 	for {
 		lineNum++
 		record, err := reader.Read()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {

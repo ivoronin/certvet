@@ -136,7 +136,7 @@ func (f Fingerprint) Truncate(octets int) string {
 	}
 
 	parts := make([]string, octets)
-	for i := 0; i < octets; i++ {
+	for i := range octets {
 		parts[i] = fmt.Sprintf("%02X", f[i])
 	}
 	return strings.Join(parts, ":") + "..."

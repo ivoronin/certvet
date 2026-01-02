@@ -5,6 +5,7 @@ import (
 	"embed"
 	"encoding/csv"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -61,7 +62,7 @@ func loadCertificates() error {
 
 	for {
 		record, err := r.Read()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
@@ -139,7 +140,7 @@ func parseStoreRecords(r *csv.Reader) (map[storeKey][]storeEntry, error) {
 
 	for {
 		record, err := r.Read()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {

@@ -84,7 +84,7 @@ WD9f
 		t.Errorf("got %d valid certs, want 1", len(valid))
 	}
 
-	if valid[0].Fingerprint != certs[0].Fingerprint {
+	if valid[0].Fingerprint != certs[0].Fingerprint { //nolint:gosec // G602: Safe - test verifies len(valid)==1 above
 		t.Errorf("fingerprint mismatch: got %q, want %q", valid[0].Fingerprint.String(), certs[0].Fingerprint.String())
 	}
 }
