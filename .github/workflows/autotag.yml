@@ -1,0 +1,11 @@
+name: Auto-tag
+on:
+  pull_request_target:
+    types: [closed]
+jobs:
+  autotag:
+    uses: ivoronin/github-workflows/.github/workflows/autotag.yml@main
+    with:
+      dependabot: false
+      autoupdate: true
+    secrets: inherit
