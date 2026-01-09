@@ -1,7 +1,7 @@
 VERSION ?= $(shell date +v%Y.%m.%d)
 LDFLAGS := -X main.Version=$(VERSION)
 
-.PHONY: build test test-unit test-integration test-coverage test-all lint clean generate dev
+.PHONY: build test test-unit test-integration test-coverage test-all lint release update clean generate dev
 
 build:
 	go build -ldflags "$(LDFLAGS)" -o certvet ./cmd/certvet
@@ -24,11 +24,17 @@ test-coverage:
 	@echo "Coverage report: coverage.html"
 
 # Run all tests including integration
-test-all: build
+test-all: lint build
 	go test -tags=integration ./...
 
 lint:
 	golangci-lint run
+
+release:
+	goreleaser release --clean
+
+update:
+	go run ./tools/generate/cmd
 
 clean:
 	rm -f certvet coverage.out coverage.html
