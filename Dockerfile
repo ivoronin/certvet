@@ -1,5 +1,6 @@
 # Build stage: compile static Go binary
-FROM golang:1.24-alpine AS builder
+ARG GO_VERSION=1.24
+FROM golang:${GO_VERSION}-alpine AS builder
 
 # Build arguments
 ARG VERSION=dev
