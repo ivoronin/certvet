@@ -64,6 +64,12 @@ docker run --rm ghcr.io/ivoronin/certvet:latest validate example.com
 
 The `:latest` tag points to the most recent release with up-to-date trust stores.
 
+### Homebrew
+
+```bash
+brew install ivoronin/ivoronin/certvet
+```
+
 ### GitHub Releases
 
 Download pre-built binaries from [Releases](https://github.com/ivoronin/certvet/releases):
