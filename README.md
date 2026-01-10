@@ -1,30 +1,14 @@
-# certvet 🩺
+# certvet
 
-**Pre-flight checks for SSL/TLS certificates against real platform trust stores.**
-
-> 💡 **testssl.sh** tests if your config is secure. **certvet** tells you if iOS 15 users can connect.
+Validate certificate chains against platform trust stores before deployment
 
 [![Build](https://img.shields.io/github/actions/workflow/status/ivoronin/certvet/release.yml?style=flat-square)](https://github.com/ivoronin/certvet/actions)
-[![Version](https://img.shields.io/github/v/release/ivoronin/certvet?style=flat-square)](https://github.com/ivoronin/certvet/releases)
-[![Docker](https://img.shields.io/badge/docker-ghcr.io-blue?style=flat-square&logo=docker)](https://github.com/ivoronin/certvet/pkgs/container/certvet)
-[![License](https://img.shields.io/badge/license-ELv2-blue?style=flat-square)](LICENSE)
-[![Platforms](https://img.shields.io/badge/platforms-linux%20%7C%20macos%20%7C%20windows-brightgreen?style=flat-square)](#supported-platforms)
+[![Release](https://img.shields.io/github/v/release/ivoronin/certvet?style=flat-square)](https://github.com/ivoronin/certvet/releases)
 
----
-
-- 🔒 **Zero Dependencies** · Single binary, embedded trust stores, works offline
-- 📱 **Multi-Platform** · iOS, Android, Chrome, macOS, Windows — all versions
-- 🔄 **CI/CD Native** · JSON output, semantic exit codes, pipeline-ready
-- 🛡️ **Privacy-First** · No telemetry, no external calls except your endpoint
-- 📅 **Fresh Data** · Trust stores updated weekly, CalVer releases
-- ⚡ **Fast** · Parallel validation, results in seconds
-
----
-
-## 🚀 Quick Start
+[Overview](#overview) · [Features](#features) · [Installation](#installation) · [Usage](#usage) · [Configuration](#configuration) · [Requirements](#requirements) · [License](#license)
 
 ```bash
-docker run --rm ghcr.io/ivoronin/certvet:latest validate google.com
+certvet validate google.com
 ```
 
 ```
@@ -35,10 +19,10 @@ windows    current   PASS         GTS Root R1
 ...
 ```
 
-Sites using recently-added CAs will show compatibility issues:
+Sites using recently-added CAs show compatibility issues on older platforms:
 
 ```bash
-docker run --rm ghcr.io/ivoronin/certvet:latest validate navercloudtrust.com
+certvet validate navercloudtrust.com
 ```
 
 ```
@@ -50,79 +34,41 @@ ios        16        PASS         NAVER Global Root Certification Authority
 ...
 ```
 
----
+## Overview
 
-## 🔍 The Problem
+certvet fetches the TLS certificate chain from an endpoint and validates it against embedded trust stores from iOS, Android, Chrome, macOS, Windows, and other platforms. Each platform version has its own trust store snapshot, allowing detection of compatibility issues with older devices that lack recently-added root CAs. The tool also enforces platform-specific constraints such as Chrome's Certificate Transparency deadlines and Windows' CA distrust timelines.
 
-SSL/TLS certificates that work on new devices often fail on older ones:
+## Features
 
-- **Older platforms** are missing recently-added root CAs
-- **Chrome** enforces Certificate Transparency (SCT) deadlines for specific CAs
-- **Windows** distrusts Symantec CAs with specific date constraints
-- **Misconfigured servers** don't send required intermediate certificates
+- Validates against embedded trust stores from Apple (iOS 12+, iPadOS 13+, macOS 10.14+, tvOS 12+, visionOS 1+, watchOS 5+), Android (7-16), Chrome Root Store, and Windows
+- Single binary with embedded trust stores, works offline without external dependencies
+- Enforces SCTNotAfter (Chrome CT deadlines), NotBeforeMax (date restrictions), and DistrustDate (CA phaseout timelines) constraints
+- JSON output and semantic exit codes (0=pass, 1=fail, 2=error) for CI/CD integration
+- Filter syntax to target specific platforms and version ranges
+- Trust stores updated weekly via automated builds; CalVer releases when stores change
+- No telemetry or external network calls except to the target endpoint
 
-**Existing tools don't help** — testssl.sh, SSL Labs, and sslyze focus on security configuration, not trust store compatibility.
+### Limitations
 
-| Tool | Primary Focus | Per-Platform Trust |
-|------|---------------|-------------------|
-| **certvet** | Trust compatibility | ✅ Yes |
-| testssl.sh | Security configuration | ❌ No |
-| SSL Labs | Security grading | ❌ No |
-| sslyze | Security scanning | ❌ No |
+- Uses only the certificate chain sent by the server; does not fetch missing intermediates via AIA
+- Validates against root CA trust stores only; does not check certificate revocation (OCSP/CRL)
+- Trust stores reflect state at build time; update to latest release for current data
 
-**certvet fills this gap** by validating the complete certificate chain against actual embedded trust stores from each platform version. If validation fails on *all* platforms, it's likely a server misconfiguration; if it fails on *some*, it's a trust store compatibility issue.
+## Installation
 
-💡 **Use together:** Run `testssl.sh` for security configuration, then `certvet` for platform compatibility.
-
----
-
-## ✨ Features
-
-### Multi-Platform Trust Validation
-
-Tests against actual embedded trust stores from:
-
-- **Apple** (iOS 12+, iPadOS 13+, macOS 10.14+, tvOS 12+, visionOS 1+, watchOS 5+): [Trust store docs](https://support.apple.com/en-us/103272)
-- **Android** (7–16, API 24+): [AOSP ca-certificates](https://android.googlesource.com/platform/system/ca-certificates/)
-- **Chrome** (Root Store): [Chrome Root Store](https://chromium.googlesource.com/chromium/src/+/main/net/data/ssl/chrome_root_store/)
-- **Windows**: [Windows Update CTL](http://ctldl.windowsupdate.com/msdownload/update/v3/static/trustedr/en/authrootstl.cab)
-
-Trust stores are checked weekly. New releases are published only when certificates or constraints change (CalVer versioning).
-
-### Trust Constraint Enforcement
-
-Validates platform-specific constraints that affect certificate trust:
-
-- **SCTNotAfter** — Chrome's Certificate Transparency deadlines
-- **NotBeforeMax** — Date-based restrictions on certificate validity
-- **DistrustDate** — CA distrust timelines (e.g., Symantec phaseout)
-
-### Production-Ready Output
-
-- Optional JSON output for easy integration with other tools
-- Semantic exit codes (0=pass, 1=fail, 2=error)
-- Flexible filter syntax for targeting specific platforms
-
----
-
-## 📥 Installation
-
-### Docker (Recommended)
-
-The easiest way to run certvet — no installation required:
+### Docker
 
 ```bash
 docker run --rm ghcr.io/ivoronin/certvet:latest validate example.com
 ```
 
-The `:latest` tag always points to the most recent release with up-to-date trust stores.
+The `:latest` tag points to the most recent release with up-to-date trust stores.
 
-### Binary Download
+### GitHub Releases
 
-Download pre-built binaries from [GitHub Releases](https://github.com/ivoronin/certvet/releases):
+Download pre-built binaries from [Releases](https://github.com/ivoronin/certvet/releases):
 
 ```bash
-# Linux/macOS
 curl -LO https://github.com/ivoronin/certvet/releases/latest/download/certvet_linux_amd64.tar.gz
 tar xzf certvet_linux_amd64.tar.gz
 ./certvet version
@@ -137,57 +83,40 @@ make build
 ./certvet version
 ```
 
-Requires Go 1.24+.
+## Usage
 
----
+### validate
 
-## 📖 Usage
+Fetch certificate chain from endpoint and validate against trust stores.
 
-```
+```bash
 certvet validate <endpoint> [flags]
+```
 
 Flags:
-  -f, --filter string      Filter expression (e.g., ios>=15,android>=10)
-  -j, --json               Output in JSON format
-      --timeout duration   Connection timeout (default 10s)
-  -h, --help               Help for validate
-```
 
-### Basic Validation
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-f, --filter` | Filter expression (e.g., `ios>=15,android>=10`) | all platforms |
+| `-j, --json` | Output in JSON format | false |
+| `--timeout` | Connection timeout | 10s |
 
-```bash
-# Using Docker
-docker run --rm ghcr.io/ivoronin/certvet:latest validate api.example.com
-
-# Using binary
-./certvet validate api.example.com
-
-# Check a specific port
-docker run --rm ghcr.io/ivoronin/certvet:latest validate api.example.com:8443
-```
-
-### Filter Syntax
+Examples:
 
 ```bash
-# Only check iOS 15+ and Android 12+
-docker run --rm ghcr.io/ivoronin/certvet:latest validate -f "ios>=15,android>=12" example.com
-
-# Check all Apple platforms
-docker run --rm ghcr.io/ivoronin/certvet:latest validate -f "ios,macos,ipados" example.com
-
-# Check specific version
-docker run --rm ghcr.io/ivoronin/certvet:latest validate -f "android=14" example.com
+certvet validate api.example.com
+certvet validate api.example.com:8443           # Specific port
+certvet validate -f "ios>=15,android>=12" api.example.com
+certvet validate -f "ios,macos,ipados" api.example.com   # All Apple platforms
+certvet validate -f "android=14" api.example.com         # Specific version
+certvet validate -j api.example.com             # JSON output
 ```
 
-**Supported platforms:** `ios`, `ipados`, `macos`, `tvos`, `visionos`, `watchos`, `android`, `chrome`, `windows`
+Supported platforms: `ios`, `ipados`, `macos`, `tvos`, `visionos`, `watchos`, `android`, `chrome`, `windows`
 
-**Operators:** `=`, `>`, `<`, `>=`, `<=`
+Filter operators: `=`, `>`, `<`, `>=`, `<=`
 
-### JSON Output
-
-```bash
-docker run --rm ghcr.io/ivoronin/certvet:latest validate -j api.example.com
-```
+JSON output format:
 
 ```json
 {
@@ -208,16 +137,62 @@ docker run --rm ghcr.io/ivoronin/certvet:latest validate -j api.example.com
 }
 ```
 
----
+### list
 
-## ⚠️ Limitations
+Display all root CA certificates in the embedded trust stores.
 
-- **Server-provided chain only**: Uses the certificate chain sent by the server. Does not fetch missing intermediates via AIA — browsers do this, but most HTTP clients (OkHttp, URLSession) don't.
-- **Root trust only**: Validates against root CA trust stores. Does not check certificate revocation (OCSP/CRL).
-- **Point-in-time**: Trust stores reflect the state at build time. Update to the latest release for current data.
+```bash
+certvet list [flags]
+```
 
----
+Flags:
 
-## 📜 License
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-f, --filter` | Filter expression | all platforms |
+| `-j, --json` | Output in JSON format | false |
+| `-w, --wide` | Display full fingerprints | false |
 
-[Elastic License 2.0](LICENSE) — free for most use cases, but cannot be offered as a hosted service.
+Examples:
+
+```bash
+certvet list
+certvet list -f "ios>=17"
+certvet list -j
+certvet list -w
+```
+
+### version
+
+Display certvet version.
+
+```bash
+certvet version [flags]
+```
+
+Flags:
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-j, --json` | Output in JSON format | false |
+
+### Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | All validations passed |
+| 1 | One or more validations failed |
+| 2 | Input or runtime error |
+
+## Configuration
+
+certvet has no configuration file or environment variables. All options are passed via command-line flags.
+
+## Requirements
+
+- Go 1.24+ (build from source only)
+- Network access to target endpoint
+
+## License
+
+[Elastic License 2.0](LICENSE)
