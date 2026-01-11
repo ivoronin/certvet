@@ -103,7 +103,8 @@ func main() {
 // Sorted by: fingerprint (ascending)
 func writeCertificatesCSV(certs []generate.Certificate) error {
 	// Sort by fingerprint ascending
-	sort.Slice(certs, func(i, j int) bool {
+	// Use SliceStable for consistency with writeStoresCSV
+	sort.SliceStable(certs, func(i, j int) bool {
 		return certs[i].Fingerprint.String() < certs[j].Fingerprint.String()
 	})
 
@@ -139,7 +140,9 @@ func writeCertificatesCSV(certs []generate.Certificate) error {
 // Sorted by: platform (asc), version (semver asc), fingerprint (asc)
 func writeStoresCSV(entries []generate.TrustEntry) error {
 	// Sort entries: platform asc, version semver asc, fingerprint asc
-	sort.Slice(entries, func(i, j int) bool {
+	// Use SliceStable to ensure deterministic output when versions are semantically equal
+	// (e.g., "11" and "11.0" both parse to semver 11.0.0)
+	sort.SliceStable(entries, func(i, j int) bool {
 		// Compare platform first
 		if entries[i].Platform != entries[j].Platform {
 			return entries[i].Platform < entries[j].Platform
