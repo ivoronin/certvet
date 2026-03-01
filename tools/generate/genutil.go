@@ -6,13 +6,27 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/hashicorp/go-retryablehttp"
 )
 
 // httpTimeout is the standard timeout for all HTTP requests.
 const httpTimeout = time.Minute
 
-// httpClient is the shared HTTP client with the standard timeout.
-var httpClient = &http.Client{Timeout: httpTimeout}
+// newHTTPClient creates a standard HTTP client with retry logic for transient failures.
+func newHTTPClient() *http.Client {
+	rc := retryablehttp.NewClient()
+	rc.RetryMax = 3
+	rc.RetryWaitMin = 5 * time.Second
+	rc.RetryWaitMax = 30 * time.Second
+	rc.Logger = nil // suppress default logging
+	rc.HTTPClient.Timeout = httpTimeout
+
+	return rc.StandardClient()
+}
+
+// httpClient is the shared HTTP client with retry logic and the standard timeout.
+var httpClient = newHTTPClient()
 
 // FetchURL fetches a URL and returns the response body.
 // Returns an error if the request fails or returns a non-200 status.
