@@ -3,7 +3,7 @@ module github.com/ivoronin/certvet
 go 1.25.0
 
 require (
-	github.com/Masterminds/semver/v3 v3.4.0
+	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/PuerkitoBio/goquery v1.12.0
 	github.com/alecthomas/participle/v2 v2.1.4
 	github.com/bufbuild/protocompile v0.14.1
