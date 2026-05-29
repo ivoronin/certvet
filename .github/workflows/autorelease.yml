@@ -1,0 +1,19 @@
+name: Auto-release
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # weekly
+  workflow_dispatch:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  autorelease:
+    uses: ivoronin/github-workflows/.github/workflows/autorelease.yml@main
+    with:
+      language: go
+    secrets: inherit
